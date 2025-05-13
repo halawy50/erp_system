@@ -26,6 +26,7 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
   bool isAddWarehouseManagement = false;
   bool isUpdateWarehouseManagement = false;
   bool isDeleteWarehouseManagement = false;
+  bool isShowPrescriptions = false;
   final List<Map<String, dynamic>> itemsWarehouseManagement = [
     {'name': 'ظاهر', 'isSelected': true},
     {'name': 'مخفي', 'isSelected': false},
@@ -146,6 +147,7 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
                                 insertWarehouseManagement: isAddWarehouseManagement,
                                 updateWarehouseManagement: isUpdateWarehouseManagement,
                                 deleteWarehouseManagement: isDeleteWarehouseManagement,
+                                isShowPrescriptions: isShowPrescriptions,
                                 //عملية الشراء
                                 isPurchase: isPurchase?['isSelected'],
                                 insertPurchase: isAddPurchase,
@@ -336,6 +338,7 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
                                             isAddWarehouseManagement = false;
                                             isUpdateWarehouseManagement = false;
                                             isDeleteWarehouseManagement = false;
+                                            isShowPrescriptions = false;
                                           }
                                         });
                                       },
@@ -443,6 +446,34 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
                                           ),
                                           Text(
                                             "يمكنه (حذف) بيانات الموارد",
+                                            style: TextStyle(fontSize: 16),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+
+                                    // show Prescriptions
+                                    Directionality(
+                                      textDirection: TextDirection.rtl,
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: [
+                                          Checkbox(
+                                            value: isShowPrescriptions,
+                                            onChanged: (bool? value) {
+                                              setState(() {
+                                                isShowPrescriptions = value ?? false;
+                                              });
+                                            },
+                                            activeColor: ColorApp.blue,
+                                            checkColor: Colors.white,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(4),
+                                            ),
+                                          ),
+                                          Text(
+                                            "عرض احصائيات الخلطات",
                                             style: TextStyle(fontSize: 16),
                                           ),
                                         ],

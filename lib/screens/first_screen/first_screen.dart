@@ -158,7 +158,8 @@ class _FirstScreenState extends State<FirstScreen> {
           deletePrescriptionManagement INTEGER,
           isHistory INTEGER,
           isInventory INTEGER,
-          isAdmin INTEGER
+          isAdmin INTEGER,
+          isShowPrescriptions INTEGER
         );
       ''');
 
@@ -169,14 +170,14 @@ class _FirstScreenState extends State<FirstScreen> {
           isPurchase, insertPurchase, updatePurchase, deletePurchase,
           isMixProduction, insertMixProduction, updateMixProduction, deleteMixProduction,
           isPrescriptionManagement, insertPrescriptionManagement, updatePrescriptionManagement, deletePrescriptionManagement,
-          isHistory, isInventory, isAdmin
+          isHistory, isInventory, isAdmin , isShowPrescriptions
         ) VALUES (
           'ا/حسام محمد', 'المسؤول', 'hossam@admin.com', 'admin123', '${DateTime.now().toIso8601String()}',
           1, 1, 1, 1,
           1, 1, 1, 1,
           1, 1, 1, 1,
           1, 1, 1, 1,
-          1, 1, 1
+          1, 1, 1, 1
         );
       ''');
 

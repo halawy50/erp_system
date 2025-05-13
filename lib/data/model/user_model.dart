@@ -11,6 +11,7 @@ class UserModel {
   bool insertWarehouseManagement;
   bool updateWarehouseManagement;
   bool deleteWarehouseManagement;
+  bool isShowPrescriptions;
 
   // عمليات الشراء
   bool isPurchase;
@@ -52,6 +53,7 @@ class UserModel {
     this.insertWarehouseManagement = false,
     this.updateWarehouseManagement = false,
     this.deleteWarehouseManagement = false,
+    this.isShowPrescriptions = false,
 
     // عمليات الشراء
     this.isPurchase = false,

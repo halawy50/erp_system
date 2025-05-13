@@ -47,7 +47,8 @@ class UserDatabase {
         deletePrescriptionManagement INTEGER,
         isHistory INTEGER,
         isInventory INTEGER,
-        isAdmin INTEGER
+        isAdmin INTEGER,
+        isShowPrescriptions INTEGER,
       );
     ''');
       return 1;
@@ -95,6 +96,7 @@ class UserDatabase {
           isHistory: row['isHistory'] == 1,
           isInventory: row['isInventory'] == 1,
           isAdmin: row['isAdmin'] == 1,
+          isShowPrescriptions: row['isShowPrescriptions'] == 1,
         );
       } else {
         return null; // إذا لم يتم العثور على المستخدم
@@ -140,6 +142,7 @@ class UserDatabase {
           isHistory: row['isHistory'] == 1,
           isInventory: row['isInventory'] == 1,
           isAdmin: row['isAdmin'] == 1,
+          isShowPrescriptions: row['isShowPrescriptions'] == 1,
         );
       } else {
         return null; // إرجاع null إذا لم يتم العثور على المستخدم
@@ -160,8 +163,8 @@ class UserDatabase {
         isPurchase, insertPurchase, updatePurchase, deletePurchase,
         isMixProduction, insertMixProduction, updateMixProduction, deleteMixProduction,
         isPrescriptionManagement, insertPrescriptionManagement, updatePrescriptionManagement, deletePrescriptionManagement,
-        isHistory, isInventory, isAdmin
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        isHistory, isInventory, isAdmin, isShowPrescriptions
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? , ?)
     ''');
 
       stmt.execute([
@@ -189,6 +192,7 @@ class UserDatabase {
         user.isHistory ? 1 : 0,
         user.isInventory ? 1 : 0,
         user.isAdmin ? 1 : 0,
+        user.isShowPrescriptions ? 1 : 0,
       ]);
 
       stmt.dispose();
@@ -229,6 +233,9 @@ class UserDatabase {
         isHistory: row['isHistory'] == 1,
         isInventory: row['isInventory'] == 1,
         isAdmin: row['isAdmin'] == 1,
+        isShowPrescriptions: row['isShowPrescriptions'] == 1,
+
+
       );
     }).toList();
   }
@@ -243,7 +250,7 @@ class UserDatabase {
         isPurchase = ?, insertPurchase = ?, updatePurchase = ?, deletePurchase = ?,
         isMixProduction = ?, insertMixProduction = ?, updateMixProduction = ?, deleteMixProduction = ?,
         isPrescriptionManagement = ?, insertPrescriptionManagement = ?, updatePrescriptionManagement = ?, deletePrescriptionManagement = ?,
-        isHistory = ?, isInventory = ?, isAdmin = ?
+        isHistory = ?, isInventory = ?, isAdmin = ? , isShowPrescriptions = ?
       WHERE userId = ?
     ''');
 
@@ -272,6 +279,7 @@ class UserDatabase {
         user.isHistory ? 1 : 0,
         user.isInventory ? 1 : 0,
         user.isAdmin ? 1 : 0,
+        user.isShowPrescriptions ? 1 : 0,
         user.userId
       ]);
 
