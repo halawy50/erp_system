@@ -4,13 +4,15 @@ import 'package:system_pvc/components/side_bar.dart';
 import 'package:system_pvc/constant/stream.dart';
 import 'package:system_pvc/data/model/user_model.dart';
 import 'package:system_pvc/local/material_database.dart';
+import 'package:system_pvc/local/mix_productions_database.dart';
 import 'package:system_pvc/local/prescription_management_database/material_prescription_management_database.dart';
 import 'package:system_pvc/local/prescription_management_database/prescription_management_database.dart';
 import 'package:system_pvc/local/user_database.dart';
 import 'package:system_pvc/repo/material_repo.dart';
+import 'package:system_pvc/repo/mix_production_repo.dart';
 import 'package:system_pvc/repo/prescription_management_repo.dart';
 import 'package:system_pvc/repo/user_repo.dart';
-import 'package:system_pvc/screens/home_screen/pages/MixProductionPage.dart';
+import 'package:system_pvc/screens/home_screen/pages/mix_production_page/MixProductionPage.dart';
 import 'package:system_pvc/screens/home_screen/pages/PurchasePage.dart';
 import 'package:system_pvc/screens/home_screen/pages/setting_page/SettingPage.dart';
 import 'package:system_pvc/screens/home_screen/pages/warehouse_management_page/WarehouseManagementPage.dart';
@@ -53,9 +55,21 @@ class _HomeScreenState extends State<HomeScreen> {
           prescriptionDb: prescriptionDb
         );
         prescriptionRepo.init();
+        ///////////////////////
+
+        //انتاج الخلطات
+        final mixProductionDB = MixProductionsDatabase();
+        final mixPrescriptionRepo = MixProductionRepo(
+            mixProductionDB ,
+            materialRepo ,
+            prescriptionRepo
+        );
+        await mixPrescriptionRepo.init();
+        // int availableQuantityPrescription = await mixPrescriptionRepo.getAvailablePrescription();
+        // print("AvailableQuantityPrescription 1 : ${availableQuantityPrescription}");
 
         setState(() {
-          permissionSystem(userRepo , materialRepo , prescriptionRepo);
+          permissionSystem(userRepo , materialRepo , prescriptionRepo , mixPrescriptionRepo);
         });
       } catch (e) {
         // التعامل مع الأخطاء
@@ -65,16 +79,23 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  void permissionSystem(UserRepo userRepo , MaterialRepo materialRepo ,PrescriptionRepository prescriptionRepo ) {
+  void permissionSystem(
+      UserRepo userRepo,
+      MaterialRepo materialRepo,
+      PrescriptionRepository prescriptionRepo,
+      MixProductionRepo mixProductionRepo,
+      ) {
     pages = [];
     titles = [];
 
     if (StreamData.userModel.isAdmin) {
       pages = [
-        WarehouseManagementPage(materialRepo: materialRepo, prescriptionRepo: prescriptionRepo),
+        WarehouseManagementPage(
+            materialRepo: materialRepo, prescriptionRepo: prescriptionRepo),
         PurchasePage(),
-        MixProductionPage(),
-        PrescriptionManagementPage(prescriptionRepo: prescriptionRepo,materialRepo: materialRepo,),
+        MixProductionPage(mixProductionRepo: mixProductionRepo),
+        PrescriptionManagementPage(
+            prescriptionRepo: prescriptionRepo, materialRepo: materialRepo),
         InventoryPage(),
         HistoryPage(),
         SettingPage(userRepo: userRepo),
@@ -90,7 +111,8 @@ class _HomeScreenState extends State<HomeScreen> {
       ];
     } else {
       if (StreamData.userModel.isWarehouseManagement) {
-        pages.add(WarehouseManagementPage(materialRepo: materialRepo , prescriptionRepo: prescriptionRepo,));
+        pages.add(WarehouseManagementPage(
+            materialRepo: materialRepo, prescriptionRepo: prescriptionRepo));
         titles.add("إدارة المخزن");
       }
       if (StreamData.userModel.isPurchase) {
@@ -98,11 +120,12 @@ class _HomeScreenState extends State<HomeScreen> {
         titles.add("عمليات الشراء");
       }
       if (StreamData.userModel.isMixProduction) {
-        pages.add(MixProductionPage());
+        pages.add(MixProductionPage(mixProductionRepo: mixProductionRepo));
         titles.add("إنتاج الخلطات");
       }
       if (StreamData.userModel.isPrescriptionManagement) {
-        pages.add(PrescriptionManagementPage(prescriptionRepo: prescriptionRepo,materialRepo: materialRepo,));
+        pages.add(PrescriptionManagementPage(
+            prescriptionRepo: prescriptionRepo, materialRepo: materialRepo));
         titles.add("إدارة الخلطة");
       }
       if (StreamData.userModel.isInventory) {
@@ -114,11 +137,12 @@ class _HomeScreenState extends State<HomeScreen> {
         titles.add("تاريخ");
       }
 
-      // نسمح دائمًا بالدخول إلى الإعدادات
+      // نضيف صفحة الإعدادات دائمًا
       pages.add(SettingPage(userRepo: userRepo));
       titles.add("إعدادات النظام");
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -131,6 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onItemSelected: (index) {
           setState(() {
             selectPage = index;
+            print("object : ${pages[index]}");
           });
         },
       ),

@@ -113,6 +113,8 @@ class _SettingPageState extends State<SettingPage> {
 
   @override
   Widget build(BuildContext context) {
+    // showSnackbar(context, "setting");
+    print("FFFUCL");
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(20),
@@ -145,7 +147,7 @@ class _SettingPageState extends State<SettingPage> {
                         padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                         height: 55,
                         color: (_nameController.text.isEmpty || _emailController.text.isEmpty || _passwordController.text.isEmpty)
-                            ? ColorApp.gray
+                            ? ColorApp.grey
                             : ColorApp.blue,
                         child: Text("حفظ الاعدادات", style: TextStyle(fontSize: 20, color: ColorApp.white)),
                       ),
@@ -341,6 +343,7 @@ class _SettingPageState extends State<SettingPage> {
 
                                   user.isInventory,
                                   user.isHistory,
+                                  user.isShowPrescriptions,
                                 ) ?? "", // Assuming permissions field exists
                               };
                             }).toList();
@@ -438,6 +441,7 @@ class _SettingPageState extends State<SettingPage> {
       bool isDeletePrescriptionManagement,
       bool isInventory,
       bool isHistory,
+      bool isShowPrescriptions,
       ) {
     String permissions = "";
 
@@ -447,7 +451,8 @@ class _SettingPageState extends State<SettingPage> {
       permissions += "مصرح (";
       if (isInsertWarehouseManagement) permissions += "إضافة, ";
       if (isUpdateWarehouseManagement) permissions += "تعديل, ";
-      if (isDeleteWarehouseManagement) permissions += "حذف";
+      if (isDeleteWarehouseManagement) permissions += "حذف, ";
+      if (isDeleteWarehouseManagement) permissions += "عرض احصائيات الخلطات";
       permissions += ")\n";
     } else {
       permissions += "غير مصرح\n";

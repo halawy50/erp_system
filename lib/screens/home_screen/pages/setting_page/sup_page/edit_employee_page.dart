@@ -27,6 +27,8 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
   bool isAddWarehouseManagement = false;
   bool isUpdateWarehouseManagement = false;
   bool isDeleteWarehouseManagement = false;
+  bool isShowPrescriptions = false;
+
   final List<Map<String, dynamic>> itemsWarehouseManagement = [
     {'name': 'ظاهر', 'isSelected': true},
     {'name': 'مخفي', 'isSelected': false},
@@ -97,6 +99,8 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
     isAddWarehouseManagement = widget.userModel.insertWarehouseManagement;
     isUpdateWarehouseManagement = widget.userModel.updateWarehouseManagement;
     isDeleteWarehouseManagement = widget.userModel.deleteWarehouseManagement;
+    isDeleteWarehouseManagement = widget.userModel.deleteWarehouseManagement;
+    isShowPrescriptions = widget.userModel.isShowPrescriptions;
 
     isAddPurchase = widget.userModel.insertPurchase;
     isUpdatePurchase = widget.userModel.updatePurchase;
@@ -186,6 +190,8 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
                                 insertWarehouseManagement: isAddWarehouseManagement,
                                 updateWarehouseManagement: isUpdateWarehouseManagement,
                                 deleteWarehouseManagement: isDeleteWarehouseManagement,
+                                isShowPrescriptions: isShowPrescriptions,
+
                                 //عملية الشراء
                                 isPurchase: isPurchase?['isSelected'],
                                 insertPurchase: isAddPurchase,
@@ -225,7 +231,7 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
                                   _passwordController.text.isEmpty ||
                                   _jobTitleController.text.isEmpty
                               )
-                                  ? ColorApp.gray
+                                  ? ColorApp.grey
                                   : ColorApp.blue,
                             ),
                             height: 55,
@@ -375,6 +381,8 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
                                             isAddWarehouseManagement = false;
                                             isUpdateWarehouseManagement = false;
                                             isDeleteWarehouseManagement = false;
+                                            isShowPrescriptions = false;
+
                                           }
                                         });
                                       },
@@ -487,6 +495,36 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
                                         ],
                                       ),
                                     ),
+
+                                    SizedBox(height: 10),
+                                    // show Prescriptions
+                                    Directionality(
+                                      textDirection: TextDirection.rtl,
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: [
+                                          Checkbox(
+                                            value: isShowPrescriptions,
+                                            onChanged: (bool? value) {
+                                              setState(() {
+                                                isShowPrescriptions = value ?? false;
+                                              });
+                                            },
+                                            activeColor: ColorApp.blue,
+                                            checkColor: Colors.white,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(4),
+                                            ),
+                                          ),
+                                          Text(
+                                            "عرض احصائيات الخلطات",
+                                            style: TextStyle(fontSize: 16),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+
                                   ],
                                 ),
                               )
@@ -495,7 +533,7 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
                         ),
 
                         SizedBox(height: 10,),
-                        Divider(color: ColorApp.gray,),
+                        Divider(color: ColorApp.grey,),
 
                         //قسم عمليات الشراء
                         Container(
@@ -674,7 +712,7 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
 
 
                         SizedBox(height: 10,),
-                        Divider(color: ColorApp.gray,),
+                        Divider(color: ColorApp.grey,),
 
                         //قسم انتاج الخلطات
                         Container(
@@ -853,7 +891,7 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
 
 
                         SizedBox(height: 10,),
-                        Divider(color: ColorApp.gray,),
+                        Divider(color: ColorApp.grey,),
 
                         // //قسم ادارة الخلطات
                         Container(
@@ -1031,7 +1069,7 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
                         ),
 
                         SizedBox(height: 10,),
-                        Divider(color: ColorApp.gray,),
+                        Divider(color: ColorApp.grey,),
 
 
                         //قسم الجرد
@@ -1107,7 +1145,7 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
                         ),
 
                         SizedBox(height: 10,),
-                        Divider(color: ColorApp.gray,),
+                        Divider(color: ColorApp.grey,),
 
                         //قسم تتبع العملبات
                         Container(
@@ -1182,7 +1220,7 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
                         ),
 
                         SizedBox(height: 10,),
-                        Divider(color: ColorApp.gray,),
+                        Divider(color: ColorApp.grey,),
 
 
                         SizedBox(height: 50,),

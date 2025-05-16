@@ -4,6 +4,7 @@ import 'package:system_pvc/constant/stream.dart';
 
 Widget tableWareHouseManagement({
   required Map<String, String> headers,
+  required int page,
   required List<Map<String, String>> headersPrescription,
   required List<Map<String, String>> rowsMaterial,
   void Function(int index)? onEdit,
@@ -11,7 +12,7 @@ Widget tableWareHouseManagement({
 }) {
   return Container(
     decoration: BoxDecoration(
-      border: Border.all(color: ColorApp.gray.withOpacity(0.5)),
+      border: Border.all(color: ColorApp.grey.withOpacity(0.5)),
       borderRadius: BorderRadius.circular(5),
     ),
     child: ConstrainedBox(
@@ -28,7 +29,7 @@ Widget tableWareHouseManagement({
               Container(
                 width: 120,
                 padding: EdgeInsets.all(12),
-                decoration: BoxDecoration(color: ColorApp.gray),
+                decoration: BoxDecoration(color: ColorApp.grey),
                 child: Text(
                   "إجراءات",
                   style: TextStyle(
@@ -52,11 +53,12 @@ Widget tableWareHouseManagement({
                 Row(
                   children: [
                     ...headers.keys.map((key) {
-                      String cellValue = row[key] ?? "";
+
+                      String cellValue = key=="id"?"${((page-1)*10)+(rowIndex+1)}":row[key] ?? "";
                       return _buildDataCell(cellValue);
                     }),
 
-                    if(StreamData.userModel.isPrescriptionManagement)
+                    if(StreamData.userModel.isShowPrescriptions)
                     ...headersPrescription.map((prescription) {
                       String prescriptionId = prescription.keys.first.toString();
                       String cellValue = row[prescriptionId] ?? "-";
@@ -68,7 +70,7 @@ Widget tableWareHouseManagement({
                       width: 120,
                       decoration: BoxDecoration(
                         color: rowIndex % 2 == 0
-                            ? ColorApp.gray.withOpacity(0.1)
+                            ? ColorApp.grey.withOpacity(0.1)
                             : Colors.white,
                       ),
                       child: Row(
@@ -87,7 +89,7 @@ Widget tableWareHouseManagement({
                     ),
                   ],
                 ),
-                Divider(color: ColorApp.gray, height: 1),
+                Divider(color: ColorApp.grey, height: 1),
               ],
             );
           }).toList(),
@@ -101,7 +103,7 @@ Widget _buildHeaderCell(String text) {
   return Expanded(
     child: Container(
       padding: EdgeInsets.all(12),
-      decoration: BoxDecoration(color: ColorApp.gray),
+      decoration: BoxDecoration(color: ColorApp.grey),
       child: Text(
         text,
         style: TextStyle(

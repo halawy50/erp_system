@@ -243,6 +243,7 @@ class UserDatabase {
   Future<int> updateUser(UserModel user) async {
     try {
       print('محاولة التحديث للمستخدم: ${user.userId}');
+
       final stmt = db.prepare('''
       UPDATE users SET
         name = ?, jobTitle = ?, userName = ?, password = ?, createdAt = ?,

@@ -1,7 +1,7 @@
 import 'package:system_pvc/data/model/material_prescription_management_model.dart';
 
 class PrescriptionManagementModel {
-  int? id;
+  int? id = 0;
   String name;
   DateTime createdAt;
   List<MaterialPrescriptionManagementModel>? materials; // إضافة هذا الحقل لاحتواء المواد المرتبطة

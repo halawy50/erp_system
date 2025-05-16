@@ -45,6 +45,10 @@ dependencies:
   file_picker: ^10.1.7
   shared_preferences: ^2.5.3
   equatable: ^2.0.7
+  syncfusion_flutter_datepicker: ^29.2.4
+  date_format: ^2.0.9
+  intl: ^0.19.0
+  dropdown_textfield: ^1.2.0
 
 dev_dependencies:
   flutter_test:

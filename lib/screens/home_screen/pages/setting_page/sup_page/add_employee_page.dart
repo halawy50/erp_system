@@ -188,7 +188,7 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
                                   _passwordController.text.isEmpty ||
                                   _jobTitleController.text.isEmpty
                               )
-                                  ? ColorApp.gray
+                                  ? ColorApp.grey
                                   : ColorApp.blue,
                             ),
                             height: 55,
@@ -452,6 +452,8 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
                                       ),
                                     ),
 
+                                    SizedBox(height: 10),
+
                                     // show Prescriptions
                                     Directionality(
                                       textDirection: TextDirection.rtl,
@@ -487,7 +489,7 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
                         ),
 
                         SizedBox(height: 10,),
-                        Divider(color: ColorApp.gray,),
+                        Divider(color: ColorApp.grey,),
 
                         //قسم عمليات الشراء
                         Container(
@@ -666,7 +668,7 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
 
 
                         SizedBox(height: 10,),
-                        Divider(color: ColorApp.gray,),
+                        Divider(color: ColorApp.grey,),
 
                         //قسم انتاج الخلطات
                         Container(
@@ -845,7 +847,7 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
 
 
                         SizedBox(height: 10,),
-                        Divider(color: ColorApp.gray,),
+                        Divider(color: ColorApp.grey,),
 
                         // //قسم ادارة الخلطات
                         Container(
@@ -1023,7 +1025,7 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
                         ),
 
                         SizedBox(height: 10,),
-                        Divider(color: ColorApp.gray,),
+                        Divider(color: ColorApp.grey,),
 
 
                         //قسم الجرد
@@ -1099,7 +1101,7 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
                         ),
 
                         SizedBox(height: 10,),
-                        Divider(color: ColorApp.gray,),
+                        Divider(color: ColorApp.grey,),
 
                         //قسم تتبع العملبات
                         Container(
@@ -1174,7 +1176,7 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
                         ),
 
                         SizedBox(height: 10,),
-                        Divider(color: ColorApp.gray,),
+                        Divider(color: ColorApp.grey,),
 
 
                         SizedBox(height: 50,),

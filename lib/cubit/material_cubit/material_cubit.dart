@@ -36,19 +36,33 @@ class MaterialCubit extends Cubit<custom.MaterialsState> {
     }
   }
 
-  Future<void> updateMaterial(MaterialModel material) async {
+  Future<int> getAllMaterialCounter({int page = 1, int itemsPerPage = 10}) async {
     try {
-      await materialRepo.updateMaterial(material);
-      fetchMaterials();
+      List<MaterialModel> materilList = await materialRepo.getMaterials(page: page);
+      return materilList.length;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  Future<bool> updateMaterial(MaterialModel material) async {
+    try {
+      bool updateMaterial = await materialRepo.updateMaterial(material);
+      if(updateMaterial){
+        fetchMaterials();
+        return true;
+      }else{
+        return false;
+      }
     } catch (e) {
       emit(custom.MaterialError('فشل في تحديث الخامة: $e'));
+      return false;
     }
   }
 
   Future<void> deleteMaterial(int id) async {
     try {
       await materialRepo.deleteMaterial(id);
-      fetchMaterials();
     } catch (e) {
       emit(custom.MaterialError('فشل في حذف الخامة: $e'));
     }

@@ -10,6 +10,7 @@ import 'package:system_pvc/data/model/prescription_management_model.dart';
 import 'package:system_pvc/repo/material_repo.dart';
 import 'package:system_pvc/repo/prescription_management_repo.dart';
 import 'package:system_pvc/screens/home_screen/pages/prescription_management_page/sup_page/add_prescription_page.dart' show AddPrescriptionPage;
+import 'package:system_pvc/screens/home_screen/pages/prescription_management_page/sup_page/edit_prescription_page.dart';
 
 class PrescriptionManagementPage extends StatefulWidget {
   final MaterialRepo materialRepo;
@@ -156,10 +157,11 @@ class _PrescriptionManagementPageState extends State<PrescriptionManagementPage>
                                   prescriptionRepo: widget.prescriptionRepo,
                                 ),
                               ),
-                            ).then((_) {
-                              _prescriptionCubit.loadAllPrescriptionsWithMaterials();
-                              loadDataAndSetup(); // إعادة تحميل البيانات بعد الإضافة
+                            ).then((_) async {
+                              // await _prescriptionCubit.loadAllPrescriptionsWithMaterials();
+                              await loadDataAndSetup();
                             });
+
                           },
                           child: Container(
                             padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
@@ -184,45 +186,81 @@ class _PrescriptionManagementPageState extends State<PrescriptionManagementPage>
                     else if (prescriptions.isEmpty)
                       Center(child: Text("لا توجد بيانات لعرضها"))
                     else
-                      tablePrescriptionManagement(
-                        headers: headers,
-                        prescriptions: prescriptions,
-                        materialUses: materialUses,
-                        onEdit: (index) {
-                          print("تعديل السطر رقم $index");
-                          // أضف وظائف التعديل هنا
-                        },
-                        onDelete: (index) {
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: Text("تأكيد الحذف"),
-                              content: Text("هل أنت متأكد من حذف هذه الخلطة؟"),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: Text("إلغاء"),
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    if (index < prescriptions.length) {
-                                      String prescriptionId = prescriptions[index]["idPrescription"];
-                                      _prescriptionCubit.deletePrescriptionWithMaterials(int.parse(prescriptionId));
-                                      Navigator.pop(context);
+                      BlocProvider(
+                      create: (context) => _prescriptionCubit,
+                      child: BlocBuilder<PrescriptionCubit, PrescriptionState>
+                        (builder: (context, state) {
+                        if (state is PrescriptionLoadingState) {
+                          return Center(child: CircularProgressIndicator());
+                        }
+                        if(state is PrescriptionLoadedState){
 
-                                      // إعادة تحميل البيانات بعد الحذف
-                                      Future.delayed(Duration(milliseconds: 500), () {
-                                        loadDataAndSetup();
-                                      });
-                                    }
-                                  },
-                                  child: Text("حذف", style: TextStyle(color: Colors.red)),
+                          return tablePrescriptionManagement
+                            (
+                            headers: headers,
+                            prescriptions: prescriptions,
+                            materialUses: materialUses,
+                            onEdit: (index) {
+                              print("تعديل السطر رقم $index");
+                              PrescriptionManagementModel prescrption = state.prescriptions[index];
+
+                              // أضف وظائف التعديل هنا
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => EditPrescriptionPage(
+                                      materialRepo: widget.materialRepo,
+                                      prescriptionRepo: widget.prescriptionRepo,
+                                      prescription: prescrption
+                                  ),
                                 ),
-                              ],
-                            ),
+                              ).then((_) async {
+                                await _prescriptionCubit.loadAllPrescriptionsWithMaterials();
+                                // await loadDataAndSetup();
+                              });
+                            },
+                            onDelete: (index) {
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: Text("تأكيد الحذف"),
+                                  content: Text("هل أنت متأكد من حذف هذه الخلطة؟"),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: Text("إلغاء"),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        if (index < prescriptions.length) {
+                                          String prescriptionId = prescriptions[index]["idPrescription"];
+                                          _prescriptionCubit.deletePrescriptionWithMaterials(int.parse(prescriptionId));
+                                          Navigator.pop(context);
+
+                                          // إعادة تحميل البيانات بعد الحذف
+                                          Future.delayed(Duration(milliseconds: 500), () {
+                                            loadDataAndSetup();
+                                          });
+                                        }
+                                      },
+                                      child: Text("حذف", style: TextStyle(color: Colors.red)),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
                           );
-                        },
-                      ),
+                        }
+
+                      else if (state is PrescriptionErrorState) {
+                          return Center(child: Text(state.errorMessage));
+                        }
+                        return Center(child: Text("برجاء تحميل البيانات"));
+                      },
+
+                    ),
+                    ),
+                    
                     SizedBox(height: 20)
                   ],
                 ),

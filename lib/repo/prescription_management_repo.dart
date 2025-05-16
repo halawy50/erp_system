@@ -46,6 +46,7 @@ class PrescriptionRepository {
     if (prescription.id == 0) return null;
 
     final materials = await materialDb.getMaterialsByPrescription(id);
+
     return prescription.copyWith(materials: materials);
   }
 
@@ -62,13 +63,16 @@ class PrescriptionRepository {
     return result;
   }
 
+  Future<List<MaterialPrescriptionManagementModel>> getMaterialsByPrescription(int fkPrescription) async {
+   return await materialDb.getMaterialsByPrescription(fkPrescription);
+  }
   /// تحديث وصفة وموادها
-  Future<int> updatePrescriptionWithMaterials(
+  Future<bool> updatePrescriptionWithMaterials(
       PrescriptionManagementModel prescription,
       List<MaterialPrescriptionManagementModel> materials,
       ) async {
     final updatedId = await prescriptionDb.updatePrescription(prescription);
-    if (updatedId == 0) return 0;
+    if (updatedId == 0) return false;
 
     // حذف المواد القديمة ثم إدخال الجديدة (أو يمكنك استخدام update لكل واحدة)
     final oldMaterials = await materialDb.getMaterialsByPrescription(updatedId);
@@ -80,7 +84,8 @@ class PrescriptionRepository {
         material.copyWith(fkPrescriptionManagement: updatedId),
       );
     }
-    return updatedId;
+    print("Reuslt : ${updatedId}");
+    return updatedId==0?false:true;
   }
 
   /// حذف وصفة وموادها المرتبطة

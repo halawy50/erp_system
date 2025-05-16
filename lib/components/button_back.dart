@@ -9,7 +9,7 @@ Widget buttonBack(BuildContext context, void Function(bool) onBack) {
     },
     child: Container(
       decoration: BoxDecoration(
-          color: ColorApp.gray,
+          color: ColorApp.grey,
           borderRadius: BorderRadius.circular(10000)
       ),
       padding: const EdgeInsets.symmetric(horizontal: 30.0 , vertical: 13),

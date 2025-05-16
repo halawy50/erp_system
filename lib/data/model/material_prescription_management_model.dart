@@ -12,8 +12,9 @@ class MaterialPrescriptionManagementModel {
     this.fkMaterial = 0,
     this.quntatyUse = 0.0,
     this.isSelected = false,
-    required this.createdAt,
-  });
+    DateTime? createdAt,
+
+  }) : createdAt = createdAt ?? DateTime.now();
 
   // دالة copyWith لتحديث البيانات بسهولة
   MaterialPrescriptionManagementModel copyWith({
@@ -22,7 +23,6 @@ class MaterialPrescriptionManagementModel {
     int? fkMaterial,
     double? quntatyUse,
     bool? isSelected,
-    DateTime? createdAt,
   }) {
     return MaterialPrescriptionManagementModel(
       idMaterialPrescriptionManagement: idMaterialPrescriptionManagement ?? this.idMaterialPrescriptionManagement,

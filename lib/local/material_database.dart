@@ -7,14 +7,14 @@ class MaterialDatabase {
   String? _dbPath;
 
   // فتح قاعدة البيانات وإنشاء الجدول إذا لم يكن موجودًا
-  Future<int> init() async {
+  Future<bool> init() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       _dbPath = prefs.getString('dbPath');
       print("object : $_dbPath");
       if (_dbPath == null || _dbPath!.isEmpty) {
         print('مسار قاعدة البيانات غير محدد');
-        return 0;
+        return false;
       }
       db = sqlite3.open(_dbPath!);
 
@@ -29,10 +29,10 @@ class MaterialDatabase {
           createdAt TEXT NOT NULL
         );
       ''');
-      return 1;
+      return true;
     } catch(e) {
       print('خطأ في تهيئة قاعدة البيانات: $e');
-      return 0;
+      return false;
     }
   }
 
@@ -40,10 +40,11 @@ class MaterialDatabase {
   Future<int> getTotalPages({int itemsPerPage = 10}) async {
     try {
       final result = db.select('SELECT COUNT(*) AS count FROM materials');
-      final int totalItems = result.first['count'] as int;
+      print('totalItemsWar: $result');
 
+      final int totalItems = result.first['count'] as int;
       final totalPages = (totalItems / itemsPerPage).ceil(); // استخدام ceil لضمان أن الصفحة الأخيرة تحتوي على العناصر المتبقية
-      print('totalItems: $totalItems totalPages: $totalPages');
+      print('totalItemsWar: $totalItems totalPages: $totalPages');
 
       return totalPages;
     } catch (e) {
@@ -54,7 +55,7 @@ class MaterialDatabase {
 
 
   // إضافة خامة جديدة
-  Future<void> insertMaterial(MaterialModel material) async {
+  Future<bool> insertMaterial(MaterialModel material) async {
     try {
       // تحويل bool إلى int (0 أو 1)
       final int isAlertsValue = material.isAlerts ? 1 : 0;
@@ -70,62 +71,146 @@ class MaterialDatabase {
         material.alertsMessage,
         material.createdAt.toIso8601String(),
       ]);
+      return true;
     } catch (e) {
       print('خطأ في إدخال المادة: $e');
-      rethrow;
+      return false;
     }
   }
 
-  // تحديث خامة
-  Future<void> updateMaterial(MaterialModel material) async {
+// تحديث خامة
+  Future<bool> updateMaterial(MaterialModel material) async {
     try {
       // تحويل bool إلى int (0 أو 1)
       final int isAlertsValue = material.isAlerts ? 1 : 0;
 
-      db.execute('''
-        UPDATE materials SET 
-          materialName = ?, 
-          quantityAvailable = ?, 
-          minimum = ?, 
-          isAlerts = ?, 
-          alertsMessage = ?, 
-          createdAt = ?
-        WHERE materialId = ?
-      ''', [
+      final stmt = db.prepare('''
+      UPDATE materials SET 
+        materialName = ?, 
+        quantityAvailable = ?, 
+        minimum = ?, 
+        isAlerts = ?, 
+        alertsMessage = ?
+      WHERE materialId = ?
+    ''');
+
+      stmt.execute([
         material.materialName,
         material.quantityAvailable,
         material.minimum,
         isAlertsValue,  // استخدام القيمة العددية
         material.alertsMessage,
-        material.createdAt.toIso8601String(),
-        material.materialId,
+        material.materialId,  // هذا هو معيار التحديث وليس حقل للتحديث
       ]);
+
+      stmt.dispose();
+      print('تم تحديث المادة بنجاح');
+
+      return true; // نجاح التحديث
     } catch (e) {
       print('خطأ في تحديث المادة: $e');
-      rethrow;
+      return false;
     }
   }
+
+  //اضافة كميات زيادة
+  Future<bool> incrementMaterialQuantity(int materialId, double quantity) async {
+    try {
+      final stmt = db.prepare('''
+      UPDATE materials 
+      SET quantityAvailable = quantityAvailable + ? 
+      WHERE materialId = ?
+    ''');
+
+      stmt.execute([quantity, materialId]);
+      stmt.dispose();
+
+      print('تمت زيادة الكمية بنجاح');
+      return true;
+    } catch (e) {
+      print('خطأ في زيادة الكمية: $e');
+      return false;
+    }
+  }
+
+  //تقليل كمية
+  Future<bool> decrementMaterialQuantity(int materialId, double quantity) async {
+    try {
+
+
+      // الحصول على الكمية الحالية
+      final result = db.select(
+        'SELECT quantityAvailable FROM materials WHERE materialId = ?',
+        [materialId],
+      );
+
+      if (result.isEmpty) {
+        print('لم يتم العثور على المادة');
+        return false;
+      }
+
+      final currentQuantity = (result.first['quantityAvailable'] as num).toDouble();
+
+      if (currentQuantity < quantity) {
+        print('الكمية غير كافية للطرح');
+        return false;
+      }
+
+
+
+      final stmt = db.prepare('''
+      UPDATE materials 
+      SET quantityAvailable = quantityAvailable - ? 
+      WHERE materialId = ?
+    ''');
+
+      stmt.execute([quantity, materialId]);
+      stmt.dispose();
+
+      print('تم إنقاص الكمية بنجاح');
+      return true;
+    } catch (e) {
+      print('خطأ في إنقاص الكمية: $e');
+      return false;
+    }
+  }
+
+
 
   // حذف خامة
-  Future<void> deleteMaterial(int id) async {
+  Future<bool> deleteMaterial(int id) async {
     try {
       db.execute('DELETE FROM materials WHERE materialId = ?', [id]);
+      return true;
     } catch (e) {
       print('خطأ في حذف المادة: $e');
-      rethrow;
+      return false;
     }
   }
 
-  // الحصول على جميع الخامات
-  Future<List<MaterialModel>> getMaterials({required int page, int itemsPerPage = 10}) async {
-    try {
-      final offset = (page - 1) * itemsPerPage;
-      final result = db.select('''
-        SELECT * FROM materials
-        ORDER BY createdAt DESC  -- ترتيب حسب التاريخ (أحدث شيء في المقدمة)
-        LIMIT ? OFFSET ?
-      ''', [itemsPerPage, offset]);
 
+  // الحصول على جميع الخامات
+  Future<List<MaterialModel>> getMaterials(
+      {int page = 1,
+        int limit = 10}
+      ) async {
+    try {
+      final offset = (page - 1) * limit;
+      final String query = '''
+        SELECT
+         materialId,
+         materialName,
+         quantityAvailable,
+         minimum,
+         isAlerts,
+         alertsMessage,
+         createdAt
+        FROM materials
+      ORDER BY createdAt DESC
+      LIMIT ? OFFSET ?
+    ''';
+
+      final result = db.select(query, [limit, offset]);
       print('data: $result');
 
       return result.map((row) {
@@ -162,7 +247,7 @@ class MaterialDatabase {
     try {
       final result = db.select('''
         SELECT * FROM materials
-        ORDER BY createdAt DESC  -- ترتيب حسب التاريخ (أحدث شيء في المقدمة)
+        ORDER BY createdAt ASC  -- ترتيب حسب التاريخ (أحدث شيء في المقدمة)
       ''');
 
       print('data: $result');
@@ -231,7 +316,7 @@ class MaterialDatabase {
   }
 
   // تحديث إشعار الخامة
-  Future<void> updateAlert({
+  Future<bool> updateAlert({
     required int id,
     required bool isAlerts,
     required String alertsMessage,
@@ -245,18 +330,21 @@ class MaterialDatabase {
         SET isAlerts = ?, alertsMessage = ?
         WHERE materialId = ?
       ''', [isAlertsValue, alertsMessage, id]);
+      return true;
     } catch (e) {
       print('خطأ في تحديث الإشعار: $e');
-      rethrow;
+      return false;
     }
   }
 
   // إغلاق الاتصال بقاعدة البيانات
-  void close() {
+  bool close() {
     try {
       db.dispose();
+      return true;
     } catch (e) {
       print('خطأ في إغلاق قاعدة البيانات: $e');
+      return false;
     }
   }
 }

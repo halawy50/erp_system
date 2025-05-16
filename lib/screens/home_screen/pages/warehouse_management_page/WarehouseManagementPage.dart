@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:system_pvc/components/show_snak_bar.dart';
 import 'package:system_pvc/components/tableWarehouseMangment.dart';
 import 'package:system_pvc/constant/color.dart';
 import 'package:system_pvc/constant/stream.dart';
@@ -14,6 +15,7 @@ import 'package:system_pvc/data/model/prescription_management_model.dart';
 import 'package:system_pvc/repo/material_repo.dart';
 import 'package:system_pvc/repo/prescription_management_repo.dart';
 import 'package:system_pvc/screens/home_screen/pages/warehouse_management_page/sup_page/add_material_page.dart';
+import 'package:system_pvc/screens/home_screen/pages/warehouse_management_page/sup_page/edit_material_page.dart';
 
 class WarehouseManagementPage extends StatefulWidget {
   final MaterialRepo materialRepo;
@@ -66,7 +68,7 @@ class _WarehouseManagementPageState extends State<WarehouseManagementPage> {
   }
 
   Future<void> _loadPrescriptions() async {
-    if(StreamData.userModel.isPrescriptionManagement)
+    if(StreamData.userModel.isShowPrescriptions)
     try {
       _prescriptions = await widget.prescriptionRepo.getAllPrescriptionsWithMaterials();
     } catch (e) {
@@ -179,14 +181,31 @@ class _WarehouseManagementPageState extends State<WarehouseManagementPage> {
               children: [
                 tableWareHouseManagementWithPrescriptions(
                   headers: headers,
+                  page: state.currentPage,
                   prescriptions: _prescriptions,
                   materialsWithPrescriptions: materialsWithPrescriptions,
                   onEdit: (index) {
                     // يمكنك تنفيذ وظيفة التعديل هنا
                     print("تعديل السطر رقم $index");
+                    MaterialModel material = state.materials[index];
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => EditMaterialPage(
+                          materialRepo: widget.materialRepo,
+                          material: material,
+                        ),
+                      ),
+                    ).then((_) {
+                      // Refresh user list when returning from add page
+                      _materialCubit.fetchMaterials(page: state.currentPage);
+                    });
+
+
                   },
                   onDelete: (index) {
-                    _showDeleteConfirmationDialog(state.materials[index].materialId);
+                    _showDeleteConfirmationDialog(state.materials[index].materialId , state.currentPage);
                   },
                 ),
                 SizedBox(height: 20),
@@ -258,7 +277,7 @@ class _WarehouseManagementPageState extends State<WarehouseManagementPage> {
     );
   }
 
-  void _showDeleteConfirmationDialog(int materialId) {
+  void _showDeleteConfirmationDialog(int materialId , int currentPage) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -272,7 +291,18 @@ class _WarehouseManagementPageState extends State<WarehouseManagementPage> {
           TextButton(
             onPressed: () {
               _materialCubit.deleteMaterial(materialId);
-              Navigator.pop(context);
+              showSnackbar(context, "تم الحذف بنجاح" , backgroundColor: Colors.green);
+              setState(() async {
+                int mixProductionList = await _materialCubit.getAllMaterialCounter(page: currentPage);
+                if(mixProductionList>0 && currentPage>=1){
+                  _materialCubit.fetchMaterials(page: currentPage);
+                  Navigator.pop(context);
+                }else if(mixProductionList<=0 && currentPage>=1){
+                  _materialCubit.fetchMaterials(page: currentPage-1);
+                  Navigator.pop(context);
+
+                }
+              });
             },
             child: Text("حذف", style: TextStyle(color: Colors.red)),
           ),

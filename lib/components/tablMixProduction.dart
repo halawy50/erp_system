@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:system_pvc/constant/color.dart';
 
-Widget tableUsers({
+Widget tableMixProduction({
   required Map<String, String> headers, // المفتاح إنجليزي والقيمة عربي
+  required int page,
   required List<Map<String, String>> rows,
   void Function(int index)? onEdit,
   void Function(int index)? onDelete,
@@ -56,8 +57,6 @@ Widget tableUsers({
         int index = entry.key;
         Map<String, String> row = entry.value;
 
-        if(row["isAdmin"]=="true"){return Container();}
-        else
           return Column(
           children: [
             Row(
@@ -69,9 +68,8 @@ Widget tableUsers({
                       decoration: BoxDecoration(
                       ),
                       child: Text(
-
-                        key=="id"?"${index}":row[key] ?? "",
-                        style: TextStyle(fontSize: 16),
+                          key=="id"?"${((page-1)*10)+(index+1)}":row[key] ?? "",
+                          style: TextStyle(fontSize: 16),
                       ),
                     ),
                   );

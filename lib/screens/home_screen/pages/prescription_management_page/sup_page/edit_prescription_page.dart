@@ -10,47 +10,100 @@ import 'package:system_pvc/data/model/material_prescription_management_model.dar
 import 'package:system_pvc/repo/material_repo.dart';
 import 'package:system_pvc/repo/prescription_management_repo.dart';
 
-class AddPrescriptionPage extends StatefulWidget {
+class EditPrescriptionPage extends StatefulWidget {
   final MaterialRepo materialRepo;
-  PrescriptionRepository prescriptionRepo;
+  final PrescriptionRepository prescriptionRepo;
+  final PrescriptionManagementModel prescription;
 
-  AddPrescriptionPage({
-    super.key,
+  const EditPrescriptionPage({
+    Key? key,
     required this.materialRepo,
-    required this.prescriptionRepo
-  });
+    required this.prescriptionRepo,
+    required this.prescription,
+  }) : super(key: key);
 
   @override
-  State<AddPrescriptionPage> createState() => _AddPrescriptionPageState();
+  State<EditPrescriptionPage> createState() => _EditPrescriptionPageState();
 }
 
-class _AddPrescriptionPageState extends State<AddPrescriptionPage> {
+class _EditPrescriptionPageState extends State<EditPrescriptionPage> {
   bool isDialog = false;
   List<Map<String, dynamic>> materialDetails = [];
   bool isButtonEnabled = false;
-  final TextEditingController prescriptionNameController = TextEditingController();
+  late TextEditingController prescriptionNameController;
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadMaterials();
+    prescriptionNameController = TextEditingController(text: widget.prescription.name);
+    _loadMaterialsAndPrescriptionDetails();
   }
 
-  Future<void> _loadMaterials() async {
-    final allMaterials = await widget.materialRepo.getAllMaterials();
+  Future<void> _loadMaterialsAndPrescriptionDetails() async {
     setState(() {
-      materialDetails = allMaterials.map((material) => {
-        'material': material,
-        'controller': TextEditingController(),
-        'isUsed': 'مستخدم', // Default to 'مستخدم'
-        'isEnabled': true
-      }).toList();
+      isLoading = true;
     });
-    // Initial check for button state
-    _checkButtonState();
+
+    try {
+      // 1. الحصول على جميع المواد
+      final allMaterials = await widget.materialRepo.getAllMaterials();
+
+      // 2. الحصول على مواد الخلطة الحالية
+      final prescriptionMaterials = await widget.prescriptionRepo.getPrescriptionWithMaterials(widget.prescription.id!);
+
+      // تجهيز مصفوفة المواد مع ضبط الحالة والكمية لكل مادة
+      List<Map<String, dynamic>> details = [];
+
+      for (var material in allMaterials) {
+        // البحث عن المادة في مواد الخلطة
+        final prescriptionMaterial = prescriptionMaterials!.materials!.firstWhere(
+              (pm) => pm.fkMaterial == material.materialId,
+          orElse: () => MaterialPrescriptionManagementModel(
+            fkMaterial: material.materialId,
+            quntatyUse: 0,
+            createdAt: DateTime.now(),
+          ),
+        );
+
+        // إنشاء عنصر للمادة
+        final TextEditingController controller = TextEditingController();
+        final bool isUsedInPrescription = prescriptionMaterial.quntatyUse > 0;
+
+        if (isUsedInPrescription) {
+          controller.text = prescriptionMaterial.quntatyUse.toString();
+        }
+
+        details.add({
+          'material': material,
+          'controller': controller,
+          'isUsed': isUsedInPrescription ? 'مستخدم' : 'غير مستخدم',
+          'isEnabled': isUsedInPrescription,
+          'prescriptionMaterial': prescriptionMaterial,
+        });
+      }
+
+      setState(() {
+        materialDetails = details;
+        isLoading = false;
+      });
+
+      // التحقق من حالة الزر
+      _checkButtonState();
+    } catch (e) {
+      print('خطأ في تحميل البيانات: $e');
+      setState(() {
+        isLoading = false;
+      });
+
+      // عرض رسالة خطأ
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('حدث خطأ أثناء تحميل البيانات: $e')),
+      );
+    }
   }
 
-  // Check if button should be enabled
+  // التحقق من حالة زر الحفظ
   void _checkButtonState() {
     bool hasValidMaterial = false;
 
@@ -66,22 +119,23 @@ class _AddPrescriptionPageState extends State<AddPrescriptionPage> {
     }
 
     setState(() {
-      isButtonEnabled = hasValidMaterial;
+      isButtonEnabled = hasValidMaterial && prescriptionNameController.text.isNotEmpty;
     });
   }
 
-  // Save the prescription with materials
-  Future<void> _savePrescription() async {
+  // حفظ التعديلات على الخلطة
+  Future<void> _updatePrescription() async {
     if (!isButtonEnabled) return;
 
     try {
-      // Create prescription model
-      final prescriptionModel = PrescriptionManagementModel(
-        name: prescriptionNameController.text.isEmpty ? "خلطة جديدة" : prescriptionNameController.text,
-        createdAt: DateTime.now(), // Ensure this matches the model's expected type
+      // تحديث نموذج الخلطة
+      final updatedPrescription = PrescriptionManagementModel(
+        id: widget.prescription.id,
+        name: prescriptionNameController.text,
+        createdAt: widget.prescription.createdAt, // الحفاظ على تاريخ الإنشاء الأصلي
       );
 
-      // Prepare materials list with quantities
+      // تجهيز قائمة المواد مع الكميات
       final List<MaterialPrescriptionManagementModel> materialsList = [];
       for (var detail in materialDetails) {
         if (detail['isUsed'] == 'مستخدم') {
@@ -89,39 +143,41 @@ class _AddPrescriptionPageState extends State<AddPrescriptionPage> {
           final quantityText = controller.text.trim();
           if (quantityText.isNotEmpty && double.tryParse(quantityText) != null && double.parse(quantityText) > 0) {
             final material = detail['material'] as MaterialModel;
-            // Use appropriate method to get material ID
-            // This might be different based on your MaterialModel implementation
-            // Common variations include:
-            // material.id, material.materialId, material.getId(), etc.
-            materialsList.add(MaterialPrescriptionManagementModel(
-             fkMaterial: material.materialId,
-             quntatyUse: double.parse(quantityText),
-             createdAt: DateTime.now(), // This will be set by the repository
-            ));
+            // استخدام prescriptionMaterial إذا كان موجودًا للحفاظ على المعرف
+            final prescriptionMaterial = detail['prescriptionMaterial'] as MaterialPrescriptionManagementModel;
+
+            int? idPrecription =await widget.prescription.id;
+            if(idPrecription !=null){
+              materialsList.add(MaterialPrescriptionManagementModel(
+                idMaterialPrescriptionManagement: prescriptionMaterial.idMaterialPrescriptionManagement, // يمكن أن يكون null إذا كانت مادة جديدة
+                fkMaterial: material.materialId,
+                fkPrescriptionManagement: idPrecription,
+                quntatyUse: double.parse(quantityText),
+              ));
+            }
+
           }
         }
       }
 
-      // Save to database
-      final result = await widget.prescriptionRepo.insertPrescriptionWithMaterials(
-        prescriptionModel,
+      // حفظ التعديلات في قاعدة البيانات
+      final result = await widget.prescriptionRepo.updatePrescriptionWithMaterials(
+        updatedPrescription,
         materialsList,
       );
 
-      if (result != 0) {
-        // Show success message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("تم إضافة الخلطة بنجاح")),
-        );
-        Navigator.pop(context);
+      if (result) {
+        // عرض رسالة نجاح
+        showSnackbar(context, "تم تحديث الخلطة بنجاح" , backgroundColor: Colors.green);
+        Navigator.pop(context, true); // العودة مع إشارة للتحديث الناجح
       } else {
-        // Show error message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("حدث خطأ أثناء حفظ الخلطة")),
-        );
+        // عرض رسالة خطأ
+        showSnackbar(context, "حدث خطأ أثناء تحديث الخلطة" , backgroundColor: Colors.red);
       }
     } catch (e) {
-      // Handle error
+      // معالجة الخطأ
+      showSnackbar(context,"حدث خطأ: $e" , backgroundColor: Colors.red);
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("حدث خطأ: $e")),
       );
@@ -130,7 +186,7 @@ class _AddPrescriptionPageState extends State<AddPrescriptionPage> {
 
   @override
   void dispose() {
-    // Dispose of all controllers to prevent memory leaks
+    // التخلص من جميع وحدات التحكم لمنع تسرب الذاكرة
     for (var detail in materialDetails) {
       (detail['controller'] as TextEditingController).dispose();
     }
@@ -167,21 +223,20 @@ class _AddPrescriptionPageState extends State<AddPrescriptionPage> {
                       child: SizedBox(
                         width: 600,
                         height: MediaQuery.of(context).size.height * 0.7,
-                        child: Column(
+                        child: isLoading
+                            ? Center(child: CircularProgressIndicator())
+                            : Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  "اضف خلطة جديد",
+                                  "تعديل الخلطة",
                                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
                                 ),
                                 InkWell(
-                                  onTap: (
-                                      prescriptionNameController.text.isNotEmpty &&
-                                      isButtonEnabled
-                                  ) ? _savePrescription : null,
+                                  onTap: isButtonEnabled ? _updatePrescription : null,
                                   child: Container(
                                     padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                                     decoration: BoxDecoration(
@@ -189,7 +244,7 @@ class _AddPrescriptionPageState extends State<AddPrescriptionPage> {
                                     ),
                                     height: 55,
                                     child: Text(
-                                      "اضف خلطة",
+                                      "حفظ التعديلات",
                                       style: TextStyle(
                                         fontWeight: FontWeight.normal,
                                         fontSize: 20,
@@ -201,7 +256,7 @@ class _AddPrescriptionPageState extends State<AddPrescriptionPage> {
                               ],
                             ),
                             SizedBox(height: 20),
-                            // Field for prescription name
+                            // حقل لاسم الخلطة
                             TextField(
                               controller: prescriptionNameController,
                               decoration: InputDecoration(
@@ -211,6 +266,9 @@ class _AddPrescriptionPageState extends State<AddPrescriptionPage> {
                                   borderSide: BorderSide(color: ColorApp.blue),
                                 ),
                               ),
+                              onChanged: (value) {
+                                _checkButtonState();
+                              },
                             ),
                             SizedBox(height: 20),
                             _buildMaterialList(),
@@ -231,7 +289,7 @@ class _AddPrescriptionPageState extends State<AddPrescriptionPage> {
   }
 
   Widget _buildMaterialList() {
-    // Define selection options
+    // تحديد خيارات الاستخدام
     final List<String> usageOptions = [
       'مستخدم',
       'غير مستخدم',
@@ -286,15 +344,15 @@ class _AddPrescriptionPageState extends State<AddPrescriptionPage> {
                         onChanged: (String? value) {
                           setState(() {
                             materialDetail['isUsed'] = value;
-                            // Disable TextField if 'غير مستخدم' is selected
+                            // تعطيل حقل النص إذا تم تحديد 'غير مستخدم'
                             materialDetail['isEnabled'] = value == 'مستخدم';
 
-                            // Clear the text field if disabled
+                            // مسح حقل النص إذا كان معطلاً
                             if (value == 'غير مستخدم') {
                               quantityController.clear();
                             }
 
-                            // Check button state after changing material status
+                            // التحقق من حالة الزر بعد تغيير حالة المادة
                             _checkButtonState();
                           });
                         },
@@ -323,7 +381,6 @@ class _AddPrescriptionPageState extends State<AddPrescriptionPage> {
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
                       ],
-
                       decoration: InputDecoration(
                         labelText: "الكمية",
                         border: OutlineInputBorder(),
@@ -335,7 +392,7 @@ class _AddPrescriptionPageState extends State<AddPrescriptionPage> {
                         ),
                       ),
                       onChanged: (value) {
-                        // Check button state after changing quantity
+                        // التحقق من حالة الزر بعد تغيير الكمية
                         _checkButtonState();
                       },
                     ),
@@ -367,8 +424,9 @@ class _AddPrescriptionPageState extends State<AddPrescriptionPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                "هل حقا تريد الخروج من هذه الصفحة",
+                "هل حقا تريد الخروج من هذه الصفحة؟ سيتم فقدان التعديلات غير المحفوظة",
                 style: TextStyle(fontSize: 18),
+                textAlign: TextAlign.center,
               ),
               SizedBox(height: 10),
               Row(
@@ -411,5 +469,3 @@ class _AddPrescriptionPageState extends State<AddPrescriptionPage> {
     );
   }
 }
-
-

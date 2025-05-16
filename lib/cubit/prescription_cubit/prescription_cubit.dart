@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:system_pvc/data/model/material_model.dart';
 import 'package:system_pvc/data/model/material_prescription_management_model.dart';
 import 'package:system_pvc/data/model/prescription_management_model.dart';
 import 'package:system_pvc/repo/prescription_management_repo.dart';
@@ -35,6 +36,12 @@ class PrescriptionCubit extends Cubit<PrescriptionState> {
     } catch (e) {
       emit(PrescriptionErrorState("فشل في تحميل الوصفة: $e"));
     }
+  }
+
+  /// استرجاع كل الوصفات مع المواد
+  Future<List<PrescriptionManagementModel>> getAllPrescriptionsWithMaterials() async {
+    final prescriptions = await prescriptionRepository.getAllPrescriptionsWithMaterials();
+    return prescriptions;
   }
 
   // إضافة وصفة مع المواد المرتبطة بها

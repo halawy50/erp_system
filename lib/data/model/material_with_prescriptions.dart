@@ -94,6 +94,7 @@ String getCellValueForPrescription(MaterialWithPrescriptions materialWithPrescri
 // تحديث Widget الخاص بعرض الجدول لإضافة عدد الخلطات الممكنة
 Widget tableWareHouseManagementWithPrescriptions({
   required Map<String, String> headers,
+  required int page,
   required List<PrescriptionManagementModel> prescriptions,
   required List<MaterialWithPrescriptions> materialsWithPrescriptions,
   void Function(int index)? onEdit,
@@ -127,6 +128,8 @@ Widget tableWareHouseManagementWithPrescriptions({
 
   return tableWareHouseManagement(
     headers: headers,
+    page: page,
+
     headersPrescription: headersPrescription,
     rowsMaterial: rowsMaterial,
     onEdit: onEdit,

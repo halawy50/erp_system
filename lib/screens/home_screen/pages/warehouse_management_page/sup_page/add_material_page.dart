@@ -154,7 +154,7 @@ class _AddMaterialPageState extends State<AddMaterialPage> {
                                         _quantityAvailableMaterial.text.isNotEmpty &&
                                         _minimumMaterial.text.isNotEmpty)
                                         ? ColorApp.blue
-                                        : ColorApp.gray,
+                                        : ColorApp.grey,
                                   ),
                                   height: 55,
                                   child: Center(

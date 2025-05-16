@@ -12,47 +12,50 @@ Widget tablePrescriptionManagement({
   return Column(
     children: [
       // Header Row
-      Row(
-        children: [
-          ...headers.values.map((headerName) {
-            return Expanded(
-              child: Container(
-                padding: EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: ColorApp.gray,
-                ),
-                child: Text(
-                  headerName,
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
+      Container(
+        width: double.infinity,
+        color: ColorApp.grey,
+        child: Row(
+          children: [
+            ...headers.values.map((headerName) {
+              return Expanded(
+                child: Container(
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: ColorApp.grey,
+                  ),
+                  child: Text(
+                    headerName,
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
-              ),
-            );
-          }).toList(),
+              );
+            }).toList(),
 
-          // عمود الإجراءات
-          Container(
-            width: 120,
-            padding: EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: ColorApp.gray,
-            ),
-            child: Text(
-              "إجراءات",
-              style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
+            // عمود الإجراءات
+            Container(
+              width: 120,
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: ColorApp.grey,
               ),
-              textAlign: TextAlign.center,
+              child: Text(
+                "إجراءات",
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+                textAlign: TextAlign.center,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-
       // Data Rows
       ...prescriptions.asMap().entries.map((entry) {
         int index = entry.key;
@@ -108,7 +111,7 @@ Widget tablePrescriptionManagement({
                 Container(
                   width: 120,
                   decoration: BoxDecoration(
-                    color: ColorApp.gray.withOpacity(0.1),
+                    color: ColorApp.grey.withOpacity(0.1),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -127,7 +130,7 @@ Widget tablePrescriptionManagement({
               ],
             ),
             Divider(
-              color: ColorApp.gray,
+              color: ColorApp.grey,
               height: 1,
             ),
           ],

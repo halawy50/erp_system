@@ -19,8 +19,41 @@ class MaterialRepo {
   // تحديث خامة
   Future<bool> updateMaterial(MaterialModel material) async {
     try {
-      await _materialDatabase.updateMaterial(material);
-      return true;
+      bool updateMaterial = await _materialDatabase.updateMaterial(material);
+      if(updateMaterial){
+        return true;
+      }else{
+        return false;
+      }
+    } catch (e) {
+      return false;
+    }
+  }
+
+
+  //اضافة كميات زيادة
+  Future<bool> incrementMaterialQuantity(int materialId, double quantity) async {
+    try {
+      bool incrementMaterialQuantity = await _materialDatabase.incrementMaterialQuantity(materialId , quantity);
+      if(incrementMaterialQuantity){
+        return true;
+      }else{
+        return false;
+      }
+    } catch (e) {
+      return false;
+    }
+  }
+
+  //تقليل كمية
+  Future<bool> decrementMaterialQuantity(int materialId, double quantity) async {
+    try {
+      bool decrementMaterialQuantity = await _materialDatabase.decrementMaterialQuantity(materialId , quantity);
+      if(decrementMaterialQuantity){
+        return true;
+      }else{
+        return false;
+      }
     } catch (e) {
       return false;
     }
@@ -40,7 +73,7 @@ class MaterialRepo {
   // الحصول على جميع الخامات
   Future<List<MaterialModel>> getMaterials({int page = 1, int itemsPerPage = 10}) async {
     try {
-      var data = await _materialDatabase.getMaterials(page: page, itemsPerPage: itemsPerPage);
+      var data = await _materialDatabase.getMaterials(page: page, limit: itemsPerPage);
       print("Catch : ${data}");
       return data;
 
@@ -72,12 +105,12 @@ class MaterialRepo {
     }
   }
 
-  Future<int> getTotalPages({int itemsPerPage = 10}) async {
+  Future<int> getTotalPages() async {
     try {
       int totalPage = await _materialDatabase.getTotalPages();
-      print("getToalPage : ${totalPage}");
-      return await _materialDatabase.getTotalPages();
 
+      print("getToalPageWar : ${totalPage}");
+      return totalPage;
     } catch (e) {
       return 0;
     }

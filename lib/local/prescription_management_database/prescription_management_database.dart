@@ -68,7 +68,7 @@ class PrescriptionManagementDatabase {
     try {
       final result = db.select('''
         SELECT * FROM prescription_management
-        ORDER BY createdAt DESC  -- ترتيب حسب التاريخ (أحدث شيء في المقدمة)
+        ORDER BY createdAt ASC  -- ترتيب حسب التاريخ (أحدث شيء في المقدمة)
       ''');
       print('data: $result');
       return result.map((row) {
