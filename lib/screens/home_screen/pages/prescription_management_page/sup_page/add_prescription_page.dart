@@ -110,21 +110,17 @@ class _AddPrescriptionPageState extends State<AddPrescriptionPage> {
 
       if (result != 0) {
         // Show success message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("تم إضافة الخلطة بنجاح")),
-        );
+        showSnackbar(context, "تم إضافة الخلطة بنجاح" , backgroundColor: Colors.green);
         Navigator.pop(context);
       } else {
         // Show error message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("حدث خطأ أثناء حفظ الخلطة")),
-        );
+        showSnackbar(context, "حدث خطأ أثناء حفظ الخلطة" , backgroundColor: ColorApp.red);
+
       }
     } catch (e) {
       // Handle error
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("حدث خطأ: $e")),
-      );
+      showSnackbar(context, "حدث خطأ: $e" , backgroundColor: ColorApp.red);
+
     }
   }
 

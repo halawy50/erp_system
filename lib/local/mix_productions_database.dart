@@ -126,17 +126,132 @@ class MixProductionsDatabase {
     }
   }
 
-  // الحصول على عدد الخلطات
-  Future<int> getTotalMixProduction() async {
+  Future<List<MixProductionModel>> getAllCountMixProductionsUserFilter(
+      String startDateSend,
+      String endDateSend,
+      List<int> fkPrescription,
+      List<int> fkEmployee, {
+        int page = 1,
+        int limit = 10,
+      }) async {
     try {
-      final result = db.select('SELECT COUNT(*) AS count FROM mix_productions');
-      final int totalItems = result.first['count'] as int;
-      return totalItems;
+      final offset = (page - 1) * limit;
+
+      List<String> whereClauses = [];
+      List<dynamic> whereArgs = [];
+
+      // فلترة بالتاريخ (بما أن التاريخ محفوظ كـ نص بصيغة YYYY-MM-DD)
+      if (startDateSend.isNotEmpty && endDateSend.isNotEmpty) {
+        whereClauses.add("dateTimeProduction BETWEEN ? AND ?");
+        whereArgs.addAll([startDateSend, endDateSend]);
+      }
+
+      // فلترة بالوصفات
+      if (fkPrescription.isNotEmpty) {
+        final placeholders = List.filled(fkPrescription.length, '?').join(', ');
+        whereClauses.add("fkPrescription IN ($placeholders)");
+        whereArgs.addAll(fkPrescription);
+      }
+
+      // فلترة بالموظفين
+      if (fkEmployee.isNotEmpty) {
+        final placeholders = List.filled(fkEmployee.length, '?').join(', ');
+        whereClauses.add("fkEmployee IN ($placeholders)");
+        whereArgs.addAll(fkEmployee);
+      }
+
+      // بناء الاستعلام الديناميكي
+      String query = '''
+      SELECT 
+        mixProductions,
+        nameMixProductions,
+        quantityMixProductions,
+        employeeName,
+        fkEmployee,
+        fkPrescription,
+        dateTimeProduction,
+        createdAt
+      FROM mix_productions
+    ''';
+
+      if (whereClauses.isNotEmpty) {
+        query += ' WHERE ' + whereClauses.join(' AND ');
+      }
+
+      query += ' ORDER BY dateTimeProduction DESC LIMIT ? OFFSET ?';
+
+      whereArgs.addAll([limit, offset]);
+
+      final result = db.select(query, whereArgs);
+
+      return result.map((row) {
+        return MixProductionModel(
+          mixProductionsId: row['mixProductions'],
+          nameMixProductions: row['nameMixProductions'],
+          quantityMixProductions: row['quantityMixProductions'],
+          employeeName: row['employeeName'],
+          fkEmployee: row['fkEmployee'],
+          fkPrescription: row['fkPrescription'],
+          dateTimeProduction: row['dateTimeProduction'],
+          createdAt: DateTime.parse(row['createdAt']),
+        );
+      }).toList();
     } catch (e) {
-      print('خطأ في حساب عدد الصفحات: $e');
+      print('خطأ: $e');
+      return [];
+    }
+  }
+
+
+
+  // الحصول على مجموع الكمية المنتجة لجميع الخلطات
+  Future<int> getTotalQuantityMixProduction(
+      String startDateSend,
+      String endDateSend,
+      List<int> fkPrescription,
+      List<int> fkEmployee,
+      ) async {
+    try {
+      List<String> whereClauses = [];
+      List<dynamic> whereArgs = [];
+
+      // فلترة بالتاريخ
+      if (startDateSend.isNotEmpty && endDateSend.isNotEmpty) {
+        whereClauses.add("dateTimeProduction BETWEEN ? AND ?");
+        whereArgs.addAll([startDateSend, endDateSend]);
+      }
+
+      // فلترة بالوصفات
+      if (fkPrescription.isNotEmpty) {
+        final placeholders = List.filled(fkPrescription.length, '?').join(', ');
+        whereClauses.add("fkPrescription IN ($placeholders)");
+        whereArgs.addAll(fkPrescription);
+      }
+
+      // فلترة بالموظفين
+      if (fkEmployee.isNotEmpty) {
+        final placeholders = List.filled(fkEmployee.length, '?').join(', ');
+        whereClauses.add("fkEmployee IN ($placeholders)");
+        whereArgs.addAll(fkEmployee);
+      }
+
+      String query = "SELECT SUM(quantityMixProductions) AS total FROM mix_productions";
+
+      if (whereClauses.isNotEmpty) {
+        query += ' WHERE ' + whereClauses.join(' AND ');
+      }
+
+      final result = db.select(query, whereArgs);
+
+      final int total = result.first['total'] as int? ?? 0;
+      return total;
+    } catch (e) {
+      print('خطأ في حساب مجموع الكمية المنتجة: $e');
       return 0;
     }
   }
+
+
 
   // جلب خلطة معينة بواسطة المعرف
   Future<MixProductionModel?> getMixProductionById(int id) async {
@@ -272,81 +387,6 @@ class MixProductionsDatabase {
     }
   }
 
-  Future<List<MixProductionModel>> getAllCountMixProductionsUserFilter(
-      String startDateSend,
-      String endDateSend,
-      List<int> fkPrescription,
-      List<int> fkEmployee, {
-        int page = 1,
-        int limit = 10,
-      }) async {
-    try {
-      final offset = (page - 1) * limit;
-
-      List<String> whereClauses = [];
-      List<dynamic> whereArgs = [];
-
-      // فلترة بالتاريخ (بما أن التاريخ محفوظ كـ نص بصيغة YYYY-MM-DD)
-      if (startDateSend.isNotEmpty && endDateSend.isNotEmpty) {
-        whereClauses.add("dateTimeProduction BETWEEN ? AND ?");
-        whereArgs.addAll([startDateSend, endDateSend]);
-      }
-
-      // فلترة بالوصفات
-      if (fkPrescription.isNotEmpty) {
-        final placeholders = List.filled(fkPrescription.length, '?').join(', ');
-        whereClauses.add("fkPrescription IN ($placeholders)");
-        whereArgs.addAll(fkPrescription);
-      }
-
-      // فلترة بالموظفين
-      if (fkEmployee.isNotEmpty) {
-        final placeholders = List.filled(fkEmployee.length, '?').join(', ');
-        whereClauses.add("fkEmployee IN ($placeholders)");
-        whereArgs.addAll(fkEmployee);
-      }
-
-      // بناء الاستعلام الديناميكي
-      String query = '''
-      SELECT 
-        mixProductions,
-        nameMixProductions,
-        quantityMixProductions,
-        employeeName,
-        fkEmployee,
-        fkPrescription,
-        dateTimeProduction,
-        createdAt
-      FROM mix_productions
-    ''';
-
-      if (whereClauses.isNotEmpty) {
-        query += ' WHERE ' + whereClauses.join(' AND ');
-      }
-
-      query += ' ORDER BY createdAt DESC LIMIT ? OFFSET ?';
-
-      whereArgs.addAll([limit, offset]);
-
-      final result = db.select(query, whereArgs);
-
-      return result.map((row) {
-        return MixProductionModel(
-          mixProductionsId: row['mixProductions'],
-          nameMixProductions: row['nameMixProductions'],
-          quantityMixProductions: row['quantityMixProductions'],
-          employeeName: row['employeeName'],
-          fkEmployee: row['fkEmployee'],
-          fkPrescription: row['fkPrescription'],
-          dateTimeProduction: row['dateTimeProduction'],
-          createdAt: DateTime.parse(row['createdAt']),
-        );
-      }).toList();
-    } catch (e) {
-      print('خطأ: $e');
-      return [];
-    }
-  }
 
 
 

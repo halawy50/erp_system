@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:system_pvc/components/show_snak_bar.dart';
 import 'package:system_pvc/components/tablePrescription.dart';
 import 'package:system_pvc/constant/color.dart';
 import 'package:system_pvc/cubit/prescription_cubit/prescription_cubit.dart';
@@ -215,8 +216,8 @@ class _PrescriptionManagementPageState extends State<PrescriptionManagementPage>
                                   ),
                                 ),
                               ).then((_) async {
-                                await _prescriptionCubit.loadAllPrescriptionsWithMaterials();
-                                // await loadDataAndSetup();
+                                 _prescriptionCubit.loadAllPrescriptionsWithMaterials();
+                                await loadDataAndSetup();
                               });
                             },
                             onDelete: (index) {
@@ -236,7 +237,7 @@ class _PrescriptionManagementPageState extends State<PrescriptionManagementPage>
                                           String prescriptionId = prescriptions[index]["idPrescription"];
                                           _prescriptionCubit.deletePrescriptionWithMaterials(int.parse(prescriptionId));
                                           Navigator.pop(context);
-
+                                          showSnackbar(context, "تم حذف الخلطة بنجاح", backgroundColor: Colors.green);
                                           // إعادة تحميل البيانات بعد الحذف
                                           Future.delayed(Duration(milliseconds: 500), () {
                                             loadDataAndSetup();

@@ -144,7 +144,7 @@ class _EditMaterialPageState extends State<EditMaterialPage> {
 
           if (result) {
             showSnackbar(context, "تم تحديث الخامة بنجاح", backgroundColor: Colors.green);
-            Navigator.pop(context);
+            Navigator.pop(context, true);
           } else {
             showSnackbar(context, "حدث خطأ أثناء التحديث", backgroundColor: Colors.red);
           }

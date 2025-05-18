@@ -93,7 +93,11 @@ class _HomeScreenState extends State<HomeScreen> {
         WarehouseManagementPage(
             materialRepo: materialRepo, prescriptionRepo: prescriptionRepo),
         PurchasePage(),
-        MixProductionPage(mixProductionRepo: mixProductionRepo),
+        MixProductionPage(
+          mixProductionRepo: mixProductionRepo ,
+          prescriptionRepository: prescriptionRepo,
+          userRepo: userRepo,
+        ),
         PrescriptionManagementPage(
             prescriptionRepo: prescriptionRepo, materialRepo: materialRepo),
         InventoryPage(),
@@ -120,7 +124,11 @@ class _HomeScreenState extends State<HomeScreen> {
         titles.add("عمليات الشراء");
       }
       if (StreamData.userModel.isMixProduction) {
-        pages.add(MixProductionPage(mixProductionRepo: mixProductionRepo));
+        pages.add(MixProductionPage(
+          mixProductionRepo: mixProductionRepo ,
+          prescriptionRepository: prescriptionRepo,
+          userRepo: userRepo,
+        ));
         titles.add("إنتاج الخلطات");
       }
       if (StreamData.userModel.isPrescriptionManagement) {
@@ -148,17 +156,33 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+        StreamData.isSlider?
         SideBar(
         selectPage: selectPage,
         titles: titles,
+        isSlider: (p0) {
+          setState(() {
+            StreamData.isSlider = false;
+          });
+        },
         onItemSelected: (index) {
           setState(() {
             selectPage = index;
             print("object : ${pages[index]}");
           });
         },
-      ),
+      ):Container(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 30.0 , horizontal: 10),
+            child: IconButton(onPressed: () {
+              setState(() {
+                StreamData.isSlider = true;
+              });
+            }, icon: Icon(Icons.arrow_forward_ios, color: Colors.black,)),
+          ),
+        ),
           Expanded(
             child: pages.isNotEmpty
                 ? pages[selectPage] // تأكد من أن الصفحة موجودة في القائمة

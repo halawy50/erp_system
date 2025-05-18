@@ -113,34 +113,11 @@ class MaterialDatabase {
     }
   }
 
-  //اضافة كميات زيادة
   Future<bool> incrementMaterialQuantity(int materialId, double quantity) async {
     try {
-      final stmt = db.prepare('''
-      UPDATE materials 
-      SET quantityAvailable = quantityAvailable + ? 
-      WHERE materialId = ?
-    ''');
-
-      stmt.execute([quantity, materialId]);
-      stmt.dispose();
-
-      print('تمت زيادة الكمية بنجاح');
-      return true;
-    } catch (e) {
-      print('خطأ في زيادة الكمية: $e');
-      return false;
-    }
-  }
-
-  //تقليل كمية
-  Future<bool> decrementMaterialQuantity(int materialId, double quantity) async {
-    try {
-
-
-      // الحصول على الكمية الحالية
+      // جلب الكمية الحالية والحد الأدنى
       final result = db.select(
-        'SELECT quantityAvailable FROM materials WHERE materialId = ?',
+        'SELECT quantityAvailable, minimum FROM materials WHERE materialId = ?',
         [materialId],
       );
 
@@ -150,17 +127,85 @@ class MaterialDatabase {
       }
 
       final currentQuantity = (result.first['quantityAvailable'] as num).toDouble();
+      final minimum = (result.first['minimum'] as num).toDouble();
+      final newQuantity = currentQuantity + quantity;
+
+      if (newQuantity > minimum) {
+        final stmt = db.prepare('''
+        UPDATE materials 
+        SET quantityAvailable = ?, 
+            isAlerts = 0, 
+            alertsMessage = ''
+        WHERE materialId = ?
+      ''');
+
+        stmt.execute([newQuantity, materialId]);
+        stmt.dispose();
+
+        print('تمت زيادة الكمية وتم إلغاء التنبيه');
+        return true;
+      }
+
+      // إذا لم تتجاوز الحد الأدنى، فقط زد الكمية
+      final stmt = db.prepare('''
+      UPDATE materials 
+      SET quantityAvailable = quantityAvailable + ?
+      WHERE materialId = ?
+    ''');
+
+      stmt.execute([quantity, materialId]);
+      stmt.dispose();
+
+      print('تمت زيادة الكمية فقط');
+      return true;
+    } catch (e) {
+      print('خطأ في زيادة الكمية: $e');
+      return false;
+    }
+  }
+  Future<bool> decrementMaterialQuantity(int materialId, double quantity) async {
+    try {
+      // جلب الكمية الحالية والحد الأدنى
+      final result = db.select(
+        'SELECT quantityAvailable, minimum FROM materials WHERE materialId = ?',
+        [materialId],
+      );
+
+      if (result.isEmpty) {
+        print('لم يتم العثور على المادة');
+        return false;
+      }
+
+      final currentQuantity = (result.first['quantityAvailable'] as num).toDouble();
+      final minimum = (result.first['minimum'] as num).toDouble();
 
       if (currentQuantity < quantity) {
         print('الكمية غير كافية للطرح');
         return false;
       }
 
+      if (currentQuantity - quantity <= minimum) {
+        final stmt = db.prepare('''
+        UPDATE materials 
+        SET quantityAvailable = quantityAvailable - ?, 
+            isAlerts = 1, 
+            alertsMessage = ?
+        WHERE materialId = ?
+      ''');
 
+        stmt.execute([
+          quantity,
+          'الكمية منخفضة عن الحد الأدنى أو تقترب منها',
+          materialId,
+        ]);
+        stmt.dispose();
+        print('تم إنقاص الكمية وتحديث التنبيه فقط');
+        return true;
+      }
 
       final stmt = db.prepare('''
       UPDATE materials 
-      SET quantityAvailable = quantityAvailable - ? 
+      SET quantityAvailable = quantityAvailable - ?
       WHERE materialId = ?
     ''');
 

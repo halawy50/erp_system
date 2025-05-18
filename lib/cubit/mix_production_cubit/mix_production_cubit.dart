@@ -45,7 +45,12 @@ class MixProductionCubit extends Cubit<MixProductionState> {
     );
     if(mixProductionList.isNotEmpty){
       print("TotalPage : ${totalPage}");
-      int totalMixProductions = await mixProductionRepo.getTotalMixProduction();
+      int totalMixProductions = await mixProductionRepo.getTotalMixProduction(
+        startDateSend,
+        endDateSend,
+        fkPrescription,
+        fkEmployee,
+      );
 
       emit(MixProductionLoaded(page, totalPage, mixProductionList , totalMixProductions));
     }else{

@@ -49,9 +49,19 @@ class MixProductionRepo {
     );
   }
 
-  Future<int> getTotalMixProduction() async {
+  Future<int> getTotalMixProduction(
+      String startDateSend,
+      String endDateSend,
+      List<int> fkPrescription,
+      List<int> fkEmployee,
+      ) async {
     try {
-      int totalMixProductions = await _database.getTotalMixProduction();
+      int totalMixProductions = await _database.getTotalQuantityMixProduction(
+        startDateSend,
+        endDateSend,
+        fkPrescription,
+        fkEmployee,
+      );
       if(totalMixProductions>0){
         return totalMixProductions;
       }else{
