@@ -50,8 +50,9 @@ This ERP is fully **scalable** and **customizable** to fit the unique needs of a
 
 ---
 
-## 📸 Screenshots (optional)
-*Coming soon...*
+## 🎥 Demo Video
+
+▶️ [Watch the full demo on Vimeo](https://vimeo.com/1099129369)
 
 ---
 
@@ -65,5 +66,3 @@ Built with 💙 by **Ahmed Abdelraheem Halawy**
 📞 +20 109 958 0723  
 🌐 [Portfolio](https://www.halawy.xyz)  
 📧 [ahmedhalawy50@gmail.com](mailto:ahmedhalawy50@gmail.com)
-
----
