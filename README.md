@@ -6,6 +6,11 @@ This system is designed to smartly manage **production**, **inventory**, and **p
 
 ---
 
+## 🎥 Demo Video
+https://github.com/user-attachments/assets/fb7cf7a1-9380-4393-9fc6-7f53a0d4c091
+
+---
+
 ## 💡 Key Features
 
 ### 🧪 Production Management
@@ -47,11 +52,6 @@ This ERP is fully **scalable** and **customizable** to fit the unique needs of a
 - **Flutter** for frontend & cross-platform UI
 - Backend-ready architecture (can integrate with APIs, databases, etc.)
 - Designed for extensibility
-
----
-
-## 🎥 Demo Video
-https://github.com/user-attachments/assets/fb7cf7a1-9380-4393-9fc6-7f53a0d4c091
 
 ---
 
