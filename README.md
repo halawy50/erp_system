@@ -51,8 +51,7 @@ This ERP is fully **scalable** and **customizable** to fit the unique needs of a
 ---
 
 ## 🎥 Demo Video
-
-▶️ [Watch the full demo on Vimeo](https://vimeo.com/1099129369)
+https://github.com/user-attachments/assets/fb7cf7a1-9380-4393-9fc6-7f53a0d4c091
 
 ---
 
