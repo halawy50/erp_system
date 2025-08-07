@@ -1,16 +1,69 @@
-# system_pvc
+# 🧩 ERP System – Built with Flutter
 
-A new Flutter project.
+🛠️ A fully integrated and customizable ERP system developed from scratch using **Flutter**.
 
-## Getting Started
+This system is designed to smartly manage **production**, **inventory**, and **purchasing** processes for manufacturing or industrial environments.
 
-This project is a starting point for a Flutter application.
+---
 
-A few resources to get you started if this is your first Flutter project:
+## 💡 Key Features
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### 🧪 Production Management
+- Create production formulas with specific material components.
+- Automatically calculate the number of formulas producible based on current inventory.
+- Track every production operation with accurate logs.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### 📦 Inventory & Procurement
+- Manage raw material purchasing and storage.
+- Real-time inventory monitoring.
+- Generate instant reports and stock balances.
+
+### 📊 Smart Filtering & Insights
+Filter all operations by:
+- 📅 Date  
+- 👨‍💼 Employees  
+- 📦 Materials  
+- 🧪 Formulas  
+
+Gain valuable insights for decision-making with precise data filtering.
+
+### 👥 Employee & Permissions System
+- Add unlimited employees.
+- Assign fine-grained permissions (View only, Edit, Create, Delete...).
+- Each user only sees what they are authorized to see, enhancing security and control.
+
+---
+
+## 🔧 Scalability & Customization
+
+This ERP is fully **scalable** and **customizable** to fit the unique needs of any production facility. It aims to:
+- Increase operational efficiency  
+- Reduce waste  
+- Save time and resources
+
+---
+
+## 🚀 Tech Stack
+- **Flutter** for frontend & cross-platform UI
+- Backend-ready architecture (can integrate with APIs, databases, etc.)
+- Designed for extensibility
+
+---
+
+## 📸 Screenshots (optional)
+*Coming soon...*
+
+---
+
+## 🤝 Contributions
+Contributions are welcome! Feel free to fork this repository and open a pull request.
+
+---
+
+## 📬 Contact
+Built with 💙 by **Ahmed Abdelraheem Halawy**  
+📞 +20 109 958 0723  
+🌐 [Portfolio](https://www.halawy.xyz)  
+📧 [ahmedhalawy50@gmail.com](mailto:ahmedhalawy50@gmail.com)
+
+---
